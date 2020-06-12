@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>googleLogin</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script type="text/javascript">
+
+</script>
+<script type="text/javascript">
+	// 초기화
+	function init() {
+	  gapi.load('auth2', function() {
+	    window.gauth = gapi.auth2.init({
+	    	client_id: '' // client_id
+	    });
+	    
+	    gauth.then(function(){
+		    	console.log('googleOauth success');
+		    	checkLoginStatus();
+	    	}
+		    ,function(){
+		    	console.log('googleOauth fail');
+		    }
+	    );
+	  });
+	}
+	// 버튼 바꾸기
+	function checkLoginStatus(){
+		var loginBtn = document.querySelector('#loginBtn');
+		var nameTxt = document.querySelector('#name');
+		
+    	if(gauth.isSignedIn.get()){
+    		console.log('logined');
+    		loginBtn.value = 'Logout';
+    		// 개인정보 가져오기
+    		var profile = gauth.currentUser.get().getBasicProfile();
+    		console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+    		console.log('Name: ' + profile.getName());
+    		console.log('Image URL: ' + profile.getImageUrl());
+    		console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+    		nameTxt.innerHTML = '<strong>'+profile.getName()+'</strong>님 반갑습니다. ';
+    	}else{
+    		console.log('logouted');
+    		loginBtn.value = 'Login';
+    		nameTxt.innerHTML = '';
+    	}
+	}
+	
+	// 로그아웃
+	function loginBtnClick(tmp) {
+		if ($(tmp).val() == 'Login') {
+			gauth.signIn().then(function() {
+				console.log('gauth.signIn()');
+				checkLoginStatus();
+			});
+		} else {
+			gauth.signOut().then(function() {
+				console.log('gauth.signOut()');
+				checkLoginStatus();
+			});
+		}
+	}
+</script>
+</head>
+<body>
+	<h1>Google Login API 테스트</h1>
+	
+	<span id="name" >
+	</span>
+	<input type="button" id="loginBtn" value="checking..." onclick="loginBtnClick(this)"/>
+	<br/>
+
+<!-- 로그인 -->
+<!-- 	
+<a href="https://accounts.google.com/o/oauth2/v2/auth?
+ scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
+ access_type=offline&
+ include_granted_scopes=true&
+ response_type=code&
+ state=state_parameter_passthrough_value&
+ redirect_uri=http://localhost:8000/googleLogin.html&
+ client_id=">로그인</a>
+	 -->
+	<script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+</body>
+</html>
